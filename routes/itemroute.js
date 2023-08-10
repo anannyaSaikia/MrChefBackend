@@ -23,4 +23,8 @@ itemRouter.get("/cart", (req, res)=>{
     res.send({msg : "Inside cart"})
 })
 
+itemRouter.get("/checkout", (req, res)=>{
+    res.send({msg : "Inside checkout"})
+})
+
 module.exports = { itemRouter };
