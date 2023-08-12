@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const { connection } = require("./config/db");
 const { UserModel } = require("./models/User.model");
+/* const { ItemModel } = require("./models/Item.model"); */
 const { authentication } = require("./middlewares/authentication");
 const { itemRouter } = require("./routes/itemroute");
 
@@ -20,6 +21,14 @@ app.use(cors({
 //base route
 app.get("/", (req, res) => {
     res.status(200).send({ msg: "Base Route" });
+    /* const createDocument = async () =>{
+        await ItemModel.insertMany(
+            [
+                        
+            ]
+        );
+    }
+    createDocument(); */
 })
 
 //signup
@@ -76,7 +85,7 @@ app.post("/login", async (req, res) => {
 
 app.use("/items", authentication, itemRouter);
 
-app.listen(8080, async () => {
+app.listen(8000, async () => {
     try {
         await connection;
         console.log("Connected to DB")
@@ -84,5 +93,5 @@ app.listen(8080, async () => {
         console.log(err);
         console.log("Error connecting to DB");
     }
-    console.log("Listening on port 8080");
+    console.log("Listening on port 8000");
 });
