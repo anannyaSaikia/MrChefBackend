@@ -17,9 +17,13 @@ itemRouter.get("/about", (req, res) => {
 })
 
 itemRouter.get("/CategoryDetails/:category", async (req, res) => {
-    const { category } = req.params.category;
-    const q = req.query;
+    const category = req.params.category;
+    console.log(category)
+    const { q } = req.query;
+    console.log(q);
     try {
+        /* const result = await ItemModel.find({name : {$regex : q, $options : "i"}}); */
+
         const result = await ItemModel.find({$or : [{name : {$regex : q, $options : "i"}}, { category: category }]});
         res.status(200).send(result);
     } catch (err) {
@@ -39,6 +43,34 @@ itemRouter.get("/cart", async (req, res) => {
     }
     
     /* res.send({ msg: "Inside cart" }) */
+})
+
+itemRouter.post("/cart", async (req, res)=>{
+    const item = req.body;
+    const id = req.user_id;
+    try{
+        const cartItem = new CartModel({
+            ...item,
+            user_id : id
+        });
+        await cartItem.save();
+        res.status(200).send({msg : "Item added to cart successfully"})
+    }catch(err){
+        res.status(500).send({msg : "Error adding item to cart"})
+    }
+})
+
+itemRouter.delete("/cart/:id", async (req,res)=>{
+    const id = req.params.id;
+
+    try {
+        const result = await CartModel.findByIdAndDelete({_id : id});
+        console.log(result)
+        res.status(200).send({msg : "Item deleted successfully"})
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({msg : "Error deleting item from cart"})
+    }
 })
 
 itemRouter.get("/checkout", (req, res) => {

@@ -15,25 +15,26 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin : "*"
+    origin: "*"
 }))
 
 //base route
-app.get("/", (req, res) => {
-    res.status(200).send({ msg: "Base Route" });
-    /* const createDocument = async () =>{
+app.get("/", async(req, res) => {
+    const allUsers = await UserModel.find(); 
+    res.status(200).send({ msg: "Base Route" , data : allUsers});
+
+    /* const createDocument = async () => {
         await ItemModel.insertMany(
-            [
-                        
-            ]
-        );
+            []
+        )
     }
-    createDocument(); */
+    createDocument() */
+    
 })
 
 //signup
 app.post("/signup", (req, res) => {
-    const { name, phNumber, email, password } = req.body;
+    const { name, mobile, email, password } = req.body;
     bcrypt.hash(password, 3, async function (err, hash) {
         if (err) {
             console.log(err);
@@ -41,7 +42,7 @@ app.post("/signup", (req, res) => {
         } else {
             const new_user = new UserModel({
                 name,
-                phNumber,
+                mobile,
                 email,
                 password: hash
             })
@@ -58,10 +59,10 @@ app.post("/signup", (req, res) => {
 
 //login
 app.post("/login", async (req, res) => {
-    const { phNumber, password } = req.body;
+    const { mobile, password } = req.body;
     let user = {};
     try {
-        user = await UserModel.findOne({ phNumber: phNumber });
+        user = await UserModel.findOne({ mobile: mobile });
     } catch (err) {
         console.log(err);
         /* res.status(500).send({msg : "Error while logging in"}); */
@@ -71,13 +72,13 @@ app.post("/login", async (req, res) => {
     } else {
         const hashed_password = user.password;
         bcrypt.compare(password, hashed_password, function (err, result) {
-            if(err){
-                res.status(400).send({msg : "Wrong Credentials. Try again!"});
-            }else{
+            if (err) {
+                res.status(400).send({ msg: "Wrong Credentials. Try again!" });
+            } else {
                 console.log(result);
                 console.log(user);
-                const token = jwt.sign({user_id : user._id}, process.env.SECRET_KEY);
-                res.status(200).send({msg : "Login Successful", token : token});
+                const token = jwt.sign({ user_id: user._id }, process.env.SECRET_KEY);
+                res.status(200).send({ msg: "Login Successful", token: token });
             }
         })
     }
