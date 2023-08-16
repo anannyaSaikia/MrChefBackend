@@ -7,7 +7,8 @@ const cartSchema = new mongoose.Schema({
    price : {type : Number, required : true},
    desc : {type : String, required : true},
    weight : {type : String, required : true},
-   user_id : {type : String}
+   user_id : {type : String},
+   quantity : {type : Number}
 });
 
 const CartModel = mongoose.model("cart", cartSchema);

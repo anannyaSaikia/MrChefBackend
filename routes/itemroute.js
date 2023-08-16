@@ -4,6 +4,17 @@ const { CartModel } = require("../models/Cart.model");
 
 const itemRouter = Router();
 
+itemRouter.get("/", async (req, res) => {
+    try {
+        const allItems = await ItemModel.find();
+        console.log(allItems);
+        res.status(200).send(allItems);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({msg : "Error getting all items data"})
+    }
+})
+
 itemRouter.get("/menu", (req, res) => {
     res.send({ msg: "Inside items menu" })
 })
@@ -19,15 +30,16 @@ itemRouter.get("/about", (req, res) => {
 itemRouter.get("/CategoryDetails/:category", async (req, res) => {
     const category = req.params.category;
     console.log(category)
-    const { q } = req.query;
+    const q = req.query.q || "";
     console.log(q);
     try {
         /* const result = await ItemModel.find({name : {$regex : q, $options : "i"}}); */
 
-        const result = await ItemModel.find({$or : [{name : {$regex : q, $options : "i"}}, { category: category }]});
+        const result = await ItemModel.find({ $and: [{ name: { $regex: q, $options: "i" } }, { category: category }] });
         res.status(200).send(result);
     } catch (err) {
-        res.status(500).send({msg : "Error getting category data, please try again later!"})
+        console.log(err)
+        res.status(500).send({ msg: "Error getting category data, please try again later!" })
     }
     /* res.send({msg : `Inside category ${item}`}) */
 })
@@ -36,40 +48,44 @@ itemRouter.get("/cart", async (req, res) => {
     //authorize user (realtionship maintenance)
     const user_id = req.user_id;
     try {
-        const cartItems = await CartModel.find({user_id : user_id});
+        const cartItems = await CartModel.find({ user_id: user_id });
         res.status(200).send(cartItems);
     } catch (error) {
-        res.status(500).send({msg : "Error getting cart items, try again later!"})
+        res.status(500).send({ msg: "Error getting cart items, try again later!" })
     }
-    
+
     /* res.send({ msg: "Inside cart" }) */
 })
 
-itemRouter.post("/cart", async (req, res)=>{
+itemRouter.post("/cart", async (req, res) => {
     const item = req.body;
     const id = req.user_id;
-    try{
+    console.log(item);
+    console.log(id);
+    try {
         const cartItem = new CartModel({
             ...item,
-            user_id : id
+            quantity : 1,
+            user_id: id
         });
+        console.log(cartItem);
         await cartItem.save();
-        res.status(200).send({msg : "Item added to cart successfully"})
-    }catch(err){
-        res.status(500).send({msg : "Error adding item to cart"})
+        res.status(200).send({ msg: "Item added to cart successfully" })
+    } catch (err) {
+        res.status(500).send({ msg: "Error adding item to cart" })
     }
 })
 
-itemRouter.delete("/cart/:id", async (req,res)=>{
+itemRouter.delete("/cart/:id", async (req, res) => {
     const id = req.params.id;
 
     try {
-        const result = await CartModel.findByIdAndDelete({_id : id});
+        const result = await CartModel.findByIdAndDelete({ _id: id });
         console.log(result)
-        res.status(200).send({msg : "Item deleted successfully"})
+        res.status(200).send({ msg: "Item deleted successfully" })
     } catch (error) {
         console.log(error);
-        res.status(500).send({msg : "Error deleting item from cart"})
+        res.status(500).send({ msg: "Error deleting item from cart" })
     }
 })
 
